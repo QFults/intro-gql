@@ -1,0 +1,14 @@
+query {
+  items {
+    _id
+    text
+    isDone
+  }
+}
+
+query {
+  item (_id: "60edd42bc1499d13a51ee02c") {
+    text
+    isDone
+  }
+}
