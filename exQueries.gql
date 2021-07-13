@@ -12,3 +12,21 @@ query {
     isDone
   }
 }
+
+# mutation {
+#   addItem (text: "Cook dinner", isDone: false) {
+#     _id
+#   }
+# }
+
+# mutation {
+#   markDone (_id: "60ede0163a60bef8bc8c6345", isDone: true) {
+#     text
+#   }
+# }
+
+mutation {
+  deleteItem (_id: "60ede0163a60bef8bc8c6345") {
+    text
+  }
+}
