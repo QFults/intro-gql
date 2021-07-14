@@ -4,8 +4,13 @@
   "description": "- Intro to GraphQL\r - Type Definitions and Resolvers\r - Queries and Mutations\r - React and GraphQL",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "if-env NODE_ENV=production && npm run start:prod || npm run start:dev",
+    "start:prod": "node server.js",
+    "start:dev": "concurrently \"nodemon --ignore 'client/*' \" \"npm run client\"",
+    "client": "cd client && npm run start",
+    "install": "cd client && npm install",
+    "build": "cd client && npm run build",
+    "heroku-postbuild": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -19,7 +24,6 @@
   },
   "homepage": "https://github.com/QFults/intro-gql#readme",
   "dependencies": {
-    "apollo-server-express": "^2.25.2",
     "express": "^4.17.1",
     "graphql": "^15.5.1",
     "mongoose": "^5.13.2"
