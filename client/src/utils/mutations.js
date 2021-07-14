@@ -9,3 +9,19 @@ export const ADD_ITEM = gql`
     }
   }
 `
+
+export const MARK_DONE = gql`
+  mutation markDone($_id: ID!, $isDone: Boolean!) {
+    markDone(_id: $_id, isDone: $isDone) {
+      _id
+    }
+  }
+`
+
+export const DELETE_ITEM = gql`
+  mutation deleteItem($_id: ID!) {
+    deleteItem(_id: $_id) {
+      _id
+    }
+  }
+`

@@ -1,16 +1,19 @@
 import { useQuery, useMutation } from '@apollo/client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { QUERY_ITEMS } from '../../utils/queries'
-import { ADD_ITEM } from '../../utils/mutations'
+import { ADD_ITEM, MARK_DONE, DELETE_ITEM } from '../../utils/mutations'
 
 const Home = () => {
   const [itemState, setItemState] = useState({
-    text: ''
+    text: '',
+    items: []
   })
 
   const { loading, data } = useQuery(QUERY_ITEMS)
 
-  const [addItem, { error }] = useMutation(ADD_ITEM)
+  const [addItem] = useMutation(ADD_ITEM)
+  const [markDone] = useMutation(MARK_DONE)
+  const [deleteItem] = useMutation(DELETE_ITEM)
 
   const handleInputChange = ({ target }) => {
     setItemState({ ...itemState, [target.name]: target.value })
@@ -26,12 +29,50 @@ const Home = () => {
           isDone: false
         }
       })
-      window.location.reload()
+      const items = JSON.parse(JSON.stringify(itemState.items))
+      items.push(data.addItem)
+      setItemState({ ...itemState, items, text: '' })
+      // window.location.reload()
     } catch (err) {
       console.error(err)
     }
   }
 
+  const handleMarkDone = async (_id, isDone) => {
+    try {
+      const { data } = await markDone({
+        variables: { _id, isDone }
+      })
+      const items = JSON.parse(JSON.stringify(itemState.items))
+      items.forEach(item => {
+        if (item._id === _id) {
+          item.isDone = isDone
+        }
+      })
+      setItemState({ ...itemState, items })
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleDeleteItem = async _id => {
+    try {
+      const { data } = await deleteItem({
+        variables: { _id }
+      })
+      let items = JSON.parse(JSON.stringify(itemState.items))
+      items = items.filter(item => item._id !== _id)
+      setItemState({ ...itemState, items })
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  useEffect(() => {
+    if (data) {
+      setItemState({ ...itemState, items: data.items })
+    }
+  }, [data])
 
   return (
     <div>
@@ -42,7 +83,7 @@ const Home = () => {
           <input
             type='text'
             name='text'
-            value={itemState.item}
+            value={itemState.text}
             onChange={handleInputChange}
           />
         </p>
@@ -52,14 +93,21 @@ const Home = () => {
         loading
           ? (
             <span>loading... please wait</span>
-          )
+            )
           : (
             <div>
               {
-                data.items.map(item => <li key={item._id}>{item.text}</li>)
+                itemState.items.map(item => (
+                  <li key={item._id}>
+                    <span onClick={() => handleMarkDone(item._id, !item.isDone)}>
+                      {item.text} | Finished: {item.isDone ? 'Yes' : 'No'}
+                    </span>
+                    <button onClick={() => handleDeleteItem(item._id)}>x</button>
+                  </li>
+                ))
               }
             </div>
-          )
+            )
       }
     </div>
   )
