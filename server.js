@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const { ApolloServer } = require('apollo-server-express')
 const { typeDefs, resolvers } = require('./schemas')
@@ -7,7 +8,8 @@ const app = express()
 
 const server = new ApolloServer({
   typeDefs,
-  resolvers
+  resolvers,
+  context: require('./utils/auth.js').authMiddleware
 })
 
 server.applyMiddleware({ app })
