@@ -4,6 +4,7 @@ import {
   ApolloProvider
 } from '@apollo/client'
 import Home from './pages/Home'
+import Auth from './pages/Auth'
 
 const client = new ApolloClient({
   uri: '/graphql',
@@ -13,7 +14,8 @@ const client = new ApolloClient({
 const App = () => {
   return (
     <ApolloProvider client={client}>
-      <Home />
+      {/* <Home /> */}
+      <Auth />
     </ApolloProvider>
   )
 }
