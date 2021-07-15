@@ -5,7 +5,10 @@ const { join } = require('path')
 
 const app = express()
 
-const server = new ApolloServer({ typeDefs, resolvers })
+const server = new ApolloServer({
+  typeDefs,
+  resolvers
+})
 
 server.applyMiddleware({ app })
 
