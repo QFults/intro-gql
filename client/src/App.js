@@ -3,6 +3,12 @@ import {
   InMemoryCache,
   ApolloProvider
 } from '@apollo/client'
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch
+} from 'react-router-dom'
+import { StoreProvider } from './utils/GlobalState'
 import Home from './pages/Home'
 import Auth from './pages/Auth'
 
@@ -14,8 +20,20 @@ const client = new ApolloClient({
 const App = () => {
   return (
     <ApolloProvider client={client}>
-      {/* <Home /> */}
-      <Auth />
+      <Router>
+        <div>
+          <StoreProvider>
+            <Switch>
+              <Route exact path='/'>
+                <Home />
+              </Route>
+              <Route path='/login'>
+                <Auth />
+              </Route>
+            </Switch>
+          </StoreProvider>
+        </div>
+      </Router>
     </ApolloProvider>
   )
 }

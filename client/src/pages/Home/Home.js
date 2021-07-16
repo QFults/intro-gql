@@ -1,14 +1,11 @@
 import { useQuery, useMutation } from '@apollo/client'
 import { useState, useEffect } from 'react'
+import { useStoreContext } from '../../utils/GlobalState'
 import { QUERY_ITEMS } from '../../utils/queries'
 import { ADD_ITEM, MARK_DONE, DELETE_ITEM } from '../../utils/mutations'
 
 const Home = () => {
-  const [itemState, setItemState] = useState({
-    text: '',
-    items: []
-  })
-
+  const [state, dispatch] = useStoreContext()
   const { loading, data } = useQuery(QUERY_ITEMS)
 
   const [addItem] = useMutation(ADD_ITEM)
@@ -16,22 +13,27 @@ const Home = () => {
   const [deleteItem] = useMutation(DELETE_ITEM)
 
   const handleInputChange = ({ target }) => {
-    setItemState({ ...itemState, [target.name]: target.value })
+    dispatch({
+      type: 'UPDATE_TEXT',
+      text: target.value
+    })
   }
 
   const handleAddItem = async event => {
     event.preventDefault()
+    const item = {
+      text: state.text,
+      isDone: false
+    }
 
     try {
       const { data } = await addItem({
-        variables: {
-          text: itemState.text,
-          isDone: false
-        }
+        variables: item
       })
-      const items = JSON.parse(JSON.stringify(itemState.items))
-      items.push(data.addItem)
-      setItemState({ ...itemState, items, text: '' })
+      dispatch({
+        type: 'ADD_ITEM',
+        item
+      })
       // window.location.reload()
     } catch (err) {
       console.error(err)
@@ -43,13 +45,10 @@ const Home = () => {
       const { data } = await markDone({
         variables: { _id, isDone }
       })
-      const items = JSON.parse(JSON.stringify(itemState.items))
-      items.forEach(item => {
-        if (item._id === _id) {
-          item.isDone = isDone
-        }
+      dispatch({
+        type: 'UPDATE_ITEM',
+        _id
       })
-      setItemState({ ...itemState, items })
     } catch (err) {
       console.error(err)
     }
@@ -60,9 +59,10 @@ const Home = () => {
       const { data } = await deleteItem({
         variables: { _id }
       })
-      let items = JSON.parse(JSON.stringify(itemState.items))
-      items = items.filter(item => item._id !== _id)
-      setItemState({ ...itemState, items })
+      dispatch({
+        type: 'DELETE_ITEM',
+        _id
+      })
     } catch (err) {
       console.error(err)
     }
@@ -70,7 +70,11 @@ const Home = () => {
 
   useEffect(() => {
     if (data) {
-      setItemState({ ...itemState, items: data.items })
+      console.log(data)
+      dispatch({
+        type: 'GET_ITEMS',
+        items: data.items
+      })
     }
   }, [data])
 
@@ -83,7 +87,7 @@ const Home = () => {
           <input
             type='text'
             name='text'
-            value={itemState.text}
+            value={state.text}
             onChange={handleInputChange}
           />
         </p>
@@ -97,7 +101,7 @@ const Home = () => {
           : (
             <div>
               {
-                itemState.items.map(item => (
+                state.items.map(item => (
                   <li key={item._id}>
                     <span onClick={() => handleMarkDone(item._id, !item.isDone)}>
                       {item.text} | Finished: {item.isDone ? 'Yes' : 'No'}
